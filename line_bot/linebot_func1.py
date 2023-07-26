@@ -1,21 +1,30 @@
+import os
 from flask import Flask
 from flask import request, abort
 from linebot.models import MessageEvent, TextMessage, TextSendMessage, ImageSendMessage, StickerSendMessage, LocationSendMessage, QuickReply, QuickReplyButton, MessageAction
 from linebot import LineBotApi, WebhookHandler
+# from linebot.v3.webhook import WebhookHandler
 from linebot.exceptions import InvalidSignatureError
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 
-access_token = '1TPCD6ZpHGsCiwTZOsHRf6w/OBvEco8uOP2kazCvccyR/BIUgB33no8n00dWMjNeSOUkrS4ozfNFnx3EhMBgvP4qH1MeoMhYUyQNlg5ePjCyRyFxm0ooV8Vx7MJe0q0pxXJKdYwqE7lQyNR6tUKDdwdB04t89/1O/w1cDnyilFU='
-secret = 'a2b400ec1f8c0364f84d1c021b745a3b'
+load_dotenv()
+
+access_token = os.getenv("ACCESS_TOKEN")
+secret = os.getenv("CHANNEL_SECRET")
+
+
 
 line_bot_api = LineBotApi(access_token)
 handler = WebhookHandler(secret)
 
 @app.route("/callback", methods=['POST'])
 def callback():
+
     signature = request.headers['X-Line-Signature']
     body = request.get_data(as_text=True)
+    print('body: ', body)
     try:
         handler.handle(body, signature)
     except InvalidSignatureError:
@@ -25,11 +34,10 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     mtext = event.message.text
-    print('mtext: ', mtext)
     if mtext == "@傳送文字":
         try:
             message = TextSendMessage(
-                text = "我是Line Bot，操你媽機掰\n"
+                text = "我是Line Bot，你好\n"
             )
             line_bot_api.reply_message(event.reply_token, message)
         
@@ -68,7 +76,7 @@ def handle_message(event):
                     sticker_id = "10881"
                 ),
                 TextSendMessage(
-                    text = "Hi!!我操你媽的機八"
+                    text = "Hi!!!!!!!!"
                 ),
                 ImageSendMessage(
                     original_content_url = "https://storage.googleapis.com/image.blocktempo.com/2020/10/meme-cultures-origin-17-years-old-4chan-3-750x375.png",
@@ -115,4 +123,4 @@ def handle_message(event):
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=3333)
